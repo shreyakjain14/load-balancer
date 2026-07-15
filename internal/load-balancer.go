@@ -102,12 +102,13 @@ func (lb* LoadBalancer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (lb *LoadBalancer) ErrorHandler(backend *Backend, w http.ResponseWriter, req *http.Request, err error) {
+	backend.OnFailure()
+	
 	if req.Method != http.MethodGet && req.Method != http.MethodOptions && req.Method != http.MethodHead {
 		http.Error(w, "Request failed", http.StatusInternalServerError)
 		return
 	}
 
-	backend.OnFailure()
 
 	start := (backend.idx + 1) % len(lb.servers)
 	idx := start

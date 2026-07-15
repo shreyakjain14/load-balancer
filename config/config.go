@@ -8,24 +8,24 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig
-	Health HealthConfig
-	Backends []BackendConfig
+    Server   ServerConfig    `yaml:"server"`
+    Health   HealthConfig    `yaml:"health"`
+    Backends []BackendConfig `yaml:"backends"`
 }
 
 type ServerConfig struct {
-	Port string
-	ReadTimeout time.Duration
-	WriteTimeout time.Duration
-}
-
-type HealthConfig struct {
-	Duration time.Duration
-	Interval time.Duration
+    Port         string        `yaml:"port"`
+    ReadTimeout  time.Duration `yaml:"readTimeout"`
+    WriteTimeout time.Duration `yaml:"writeTimeout"`
 }
 
 type BackendConfig struct {
-	URL string	
+    URL string `yaml:"url"`
+}
+
+type HealthConfig struct {
+    Interval time.Duration `yaml:"interval"`
+    Timeout  time.Duration `yaml:"timeout"`
 }
 
 func GetConfig(path string) (Config, error) {

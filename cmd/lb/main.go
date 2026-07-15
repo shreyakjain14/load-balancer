@@ -25,12 +25,20 @@ func main() {
     	log.Fatal("at least one backend required")
 	}
 
+	added := 0
+
 	for i := range con.Backends {
 		err := lb.AddBackend(con.Backends[i].URL)
 
 		if err != nil {
 			log.Printf("failed to add backend %v", con.Backends[i].URL)
+		} else {
+			added++
 		}
+	}
+
+	if added == 0 {
+		log.Fatal("No backends added")
 	}
 
 	mux := http.NewServeMux()
@@ -40,8 +48,8 @@ func main() {
 	server := &http.Server{
 		Addr:         ":" + con.Server.Port,
 		Handler:      mux,
-		ReadTimeout:  10 * con.Server.ReadTimeout,
-		WriteTimeout: 10 * con.Server.WriteTimeout,
+		ReadTimeout:  con.Server.ReadTimeout,
+		WriteTimeout: con.Server.WriteTimeout,	
 	}
 
 	errCh := make(chan error, 1)

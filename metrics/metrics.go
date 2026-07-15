@@ -81,6 +81,6 @@ func(m *Metrics) Snapshot() MetricsResponse {
 func(m *Metrics) Handler(w http.ResponseWriter, r *http.Request) {
 	snapshot := m.Snapshot()
 	
-	json.NewEncoder(w).Encode(snapshot)
 	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(snapshot)
 }
