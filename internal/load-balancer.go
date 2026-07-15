@@ -54,10 +54,6 @@ func (lb *LoadBalancer) AddBackend(rawURL string) error {
 	return nil;
 }
 
-func (lb *LoadBalancer) Next(backend *Backend) {
-
-}
-
 func (lb* LoadBalancer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	lb.counter.mu.Lock()
 	start := lb.counter.count
@@ -76,8 +72,9 @@ func (lb* LoadBalancer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	for {
 		alive := lb.servers[lb.counter.count].IsAlive()
+		allowed := lb.servers[lb.counter.count].AllowRequest()
 
-		if alive {
+		if alive && allowed {
 			idx := lb.counter.count
 			lb.counter.count = (lb.counter.count + 1) % len(lb.servers)
 			lb.counter.mu.Unlock()
@@ -110,23 +107,24 @@ func (lb *LoadBalancer) ErrorHandler(backend *Backend, w http.ResponseWriter, re
 		return
 	}
 
+	backend.OnFailure()
 
-	backend.SetAlive(false)
 	start := (backend.idx + 1) % len(lb.servers)
 	idx := start
 	retryState, ok := req.Context().Value(retryKey).(*RetryState)
 	requestState := request.GetRequestState(req)
-	request.IncrRetry(req)
 
 
 	if !ok {
 		requestState.Recorder.Status = 503
 		http.Error(w, "Retry State missing", http.StatusInternalServerError)
+		return
 	}
 
 
 	for {
-		if lb.servers[idx].IsAlive() && retryState.Try(idx)  {
+		if lb.servers[idx].IsAlive() && lb.servers[idx].AllowRequest() && retryState.Try(idx)  {
+			request.IncrRetry(req)
 			lb.servers[idx].proxy.ServeHTTP(w, req)
 			return
 		}

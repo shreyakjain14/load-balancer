@@ -13,5 +13,10 @@ func NewProxy(lb *LoadBalancer, backend *Backend) *httputil.ReverseProxy {
 		lb.ErrorHandler(backend, w, r, err)
 	}
 
+	proxy.ModifyResponse = func(resp *http.Response) error {
+   	 	backend.OnSuccess()
+    	return nil
+	}
+
 	return proxy
 }
