@@ -1,0 +1,12 @@
+server:
+  port: 8080
+  readTimeout: 10s
+  writeTimeout: 30s
+
+health:
+  interval: 30s
+  timeout: 2s
+
+backends:
+  - url: http://localhost:3000
+  - url: http://localhost:8090
