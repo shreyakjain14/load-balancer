@@ -58,8 +58,6 @@ func main() {
     	errCh <- server.ListenAndServe()
 	}()
 
-
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
